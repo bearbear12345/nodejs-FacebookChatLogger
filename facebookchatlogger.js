@@ -43,27 +43,29 @@ login({
     listenEvents: true
   });
   api.listen(function callback(err, event) {
-    switch (event.type) {
-      case "message":
-        if (event.body != "") {
-          writeFormattedLine(event.timestamp + " | " + event.senderID + " | " + event.senderName + " | CHAT | MESSAGE | " + event.body, event.threadID);
-        }
-        if (event.body == "" || event.attachments.length > 0) {
-          iterateAttachments(event);
-          return;
-        }
-      case "event":
-        switch (event.logMessageType) {
-          case "log:thread-name":
-            writeFormattedLine(Date.now() + " | " + event.author + " | " + event.senderName + " | EVENT | TITLE | " + event.logMessageData['name'], event.threadID);
+    if (typeof lastname !== "undefined") {
+      switch (event.type) {
+        case "message":
+          if (event.body != "") {
+            writeFormattedLine(event.timestamp + " | " + event.senderID + " | " + event.senderName + " | CHAT | MESSAGE | " + event.body, event.threadID);
+          }
+          if (event.body == "" || event.attachments.length > 0) {
+            iterateAttachments(event);
             return;
-          case "log:subscribe":
-            writeFormattedLine(Date.now() + " | " + event.author + " | " + event.logMessageBody.substr(0, event.logMessageBody.indexOf(' added ')) + " | EVENT | JOIN | " + event.logMessageBody, event.threadID);
-            return;
-          case "log:unsubscribe":
-            writeFormattedLine(Date.now() + " | " + event.author + " | " + event.logMessageBody.substr(0, event.logMessageBody.indexOf(' removed ')) + " | EVENT | LEAVE | " + event.logMessageBody, event.threadID);
-            return;
-        }
+          }
+        case "event":
+          switch (event.logMessageType) {
+            case "log:thread-name":
+              writeFormattedLine(Date.now() + " | " + event.author + " | " + event.senderName + " | EVENT | TITLE | " + event.logMessageData['name'], event.threadID);
+              return;
+            case "log:subscribe":
+              writeFormattedLine(Date.now() + " | " + event.author + " | " + event.logMessageBody.substr(0, event.logMessageBody.indexOf(' added ')) + " | EVENT | JOIN | " + event.logMessageBody, event.threadID);
+              return;
+            case "log:unsubscribe":
+              writeFormattedLine(Date.now() + " | " + event.author + " | " + event.logMessageBody.substr(0, event.logMessageBody.indexOf(' removed ')) + " | EVENT | LEAVE | " + event.logMessageBody, event.threadID);
+              return;
+          }
+      }
     }
   });
 });
