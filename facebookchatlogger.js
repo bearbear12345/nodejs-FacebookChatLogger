@@ -43,7 +43,7 @@ login({
     listenEvents: true
   });
   api.listen(function callback(err, event) {
-    if (typeof lastname !== "undefined") {
+    if (typeof event !== "undefined") {
       switch (event.type) {
         case "message":
           if (event.body != "") {
