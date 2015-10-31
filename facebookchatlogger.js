@@ -47,7 +47,7 @@ login({
       switch (event.type) {
         case "message":
           if (event.body != "") {
-            writeFormattedLine(event.timestamp + " | " + event.senderID + " | " + event.senderName + " | CHAT | MESSAGE | " + event.body, event.threadID);
+            writeFormattedLine(event.timestamp + " | " + event.senderID + " | " + event.senderName + " | CHAT | MESSAGE | " + event.body.replace("\n","\\n"), event.threadID);
           }
           if (event.body == "" || event.attachments.length > 0) {
             iterateAttachments(event);
