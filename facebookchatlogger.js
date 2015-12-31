@@ -57,10 +57,10 @@ function main() {
     var request = https.get(url, function(response) {
       response.pipe(file);
       file.on('finish', function() {
-        file.close(cb);=
+        file.close(cb);
       });
-    }).on('error', function(err) {=
-      fs.unlink(dest);=
+    }).on('error', function(err) {
+      fs.unlink(dest);
       if (cb) cb(err.message);
     });
   };
