@@ -1,12 +1,10 @@
-/* Application Settings */
-var _logdir_ = "~/fbchatlog/logs";
-var _downloadsdir_ = "~/fbchatlog/downloads";
-// TODO - Sanitise directory inputs
-
 /* User Credentials */
-
 var _username_ = "";
 var _password_ = "";
+
+/* Application Settings */
+var _logdir_ = __dirname + "/logs";
+var _downloadsdir_ = __dirname + "/downloads";
 
 //////////////////////////////////////////////////
 // Let's not edit anything below here shall we? //
@@ -14,21 +12,8 @@ var _password_ = "";
 //////////////////////////////////////////////////
 
 function main() {
-  var login = require("facebook-chat-api");
 
-  /* #module overrides */
-  require('facebook-chat-api/utils').formatTyp = function(event) {
-      return {
-        isTyping: !!event.st,
-        from: event.from.toString(),
-       /* threadID: (event.to || event.thread_fbid || event.from).toString(),
-          from_mobile: !!event.from_mobile,
-          userID: (event.realtime_viewer_fbid || event.from).toString(),
-       */
-      // ^ In some typing event instances, the above three keys aren't received, causing errors
-      type: 'typ',
-    };
-  }
+  var login = require("facebook-chat-api");
 
   var fs = require('fs');
   var path = require('path');
@@ -52,7 +37,9 @@ function main() {
   }
 
   var download = function(url, dest, file, cb) {
-    fs.mkdirParent(dest);
+    if (!fs.existsSync(dest)) {
+      fs.mkdirSync(dest);
+    }
     var file = fs.createWriteStream(dest + "/" + file);
     var request = https.get(url, function(response) {
       response.pipe(file);
@@ -92,58 +79,75 @@ function main() {
     }
   }
 
-  fs.mkdirParent(_logdir_)
-  fs.mkdirParent(_downloadsdir_)
-  fs.mkdirParent(_downloadsdir_ + "/thread")
-  fs.mkdirParent(_downloadsdir_ + "/sticker")
+  fs.mkdirParent(_logdir_);
+  fs.mkdirParent(_downloadsdir_);
+  fs.mkdirParent(_downloadsdir_ + "/thread");
+  fs.mkdirParent(_downloadsdir_ + "/sticker");
 
-  login({
-    email: _username_,
-    password: _password_
-  }, function callback(err, api) {
-    if (err) return console.error(err);
-    api.setOptions({
-      logLevel: "error",
-      selfListen: true,
-      listenEvents: true
-    });
-    api.listen(function callback(err, event) {
-
-      if (err) {
-        debugWrite('error - ' + JSON.stringify(err));
-        return;
+  var application = function(err, api) {
+    var cont = true;
+    if (err) {
+      if (err.error == "Error retrieving userID. This can be caused by a lot of things, including getting blocked by Facebook for logging in from an unknown location. Try logging in with a browser to verify.") {
+        cont = false;
+        login({
+          email: _username_,
+          password: _password_
+        }, application);
+      } else {
+        return console.log(err);
       }
-      debugWrite(JSON.stringify(event))
-      if (typeof event !== "undefined") {
-        switch (event.type) {
-          case "message":
-            if (event.body != "") {
-              writeFormattedLine(event.timestamp + " | " + event.senderID + " | " + event.senderName + " | CHAT | MESSAGE | " + event.body.replace(/\n/g, '\\n'), event.threadID);
-            }
-            if (event.body == "" || event.attachments.length > 0) {
-              iterateAttachments(event);
-              break;
-            }
-            break;
-          case "event":
-            switch (event.logMessageType) {
-              case "log:thread-name":
-                writeFormattedLine(Date.now() + " | " + event.author + " | " + event.logMessageBody.substr(0, event.logMessageBody.indexOf(' named ')) + " | EVENT | TITLE | " + event.logMessageData['name'], event.threadID);
-                break;
-              case "log:subscribe":
-                writeFormattedLine(Date.now() + " | " + event.author + " | " + event.logMessageBody.substr(0, event.logMessageBody.indexOf(' added ')) + " | EVENT | JOIN | " + event.logMessageBody, event.threadID);
-                break;
-              case "log:unsubscribe":
-                writeFormattedLine(Date.now() + " | " + event.author + " | " + event.logMessageBody.substr(0, event.logMessageBody.indexOf(' removed ')) + " | EVENT | LEAVE | " + event.logMessageBody, event.threadID);
-                break;
-            }
-            break;
-          default:
-            break;
+    }
+
+    if (cont) {
+      fs.writeFileSync(__dirname + '/.appstate.json', JSON.stringify(api.getAppState()));
+      api.setOptions({
+        logLevel: "error",
+        selfListen: true,
+        listenEvents: true
+      });
+      api.listen(function callback(err, event) {
+
+        if (err) {
+          debugWrite('error - ' + JSON.stringify(err));
+          return;
         }
-      }
-    });
-  });
+        debugWrite(JSON.stringify(event))
+        if (typeof event !== "undefined") {
+          switch (event.type) {
+            case "message":
+              if (event.body != "") {
+                writeFormattedLine(event.timestamp + " | " + event.senderID + " | " + event.senderName + " | CHAT | MESSAGE | " + event.body.replace(/\n/g, '\\n'), event.threadID);
+              }
+              if (event.body == "" || event.attachments.length > 0) {
+                iterateAttachments(event);
+                break;
+              }
+              break;
+            case "event":
+              switch (event.logMessageType) {
+                case "log:thread-name":
+                  writeFormattedLine(Date.now() + " | " + event.author + " | " + event.logMessageBody.substr(0, event.logMessageBody.indexOf(' named ')) + " | EVENT | TITLE | " + event.logMessageData['name'], event.threadID);
+                  break;
+                case "log:subscribe":
+                  writeFormattedLine(Date.now() + " | " + event.author + " | " + event.logMessageBody.substr(0, event.logMessageBody.indexOf(' added ')) + " | EVENT | JOIN | " + event.logMessageBody, event.threadID);
+                  break;
+                case "log:unsubscribe":
+                  writeFormattedLine(Date.now() + " | " + event.author + " | " + event.logMessageBody.substr(0, event.logMessageBody.indexOf(' removed ')) + " | EVENT | LEAVE | " + event.logMessageBody, event.threadID);
+                  break;
+              }
+              break;
+            default:
+              break;
+          }
+        }
+      });
+    }
+  }
+  login({
+    appState: fs.existsSync(__dirname + '/.appstate.json') ? JSON.parse(fs.readFileSync(__dirname + '/.appstate.json', 'utf8')) : "",
+    email: _username_,
+    password: _password_,
+  }, application);
 }
 
 main();
