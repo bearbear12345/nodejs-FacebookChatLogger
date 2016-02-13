@@ -20,7 +20,7 @@ function main() {
   var https = require('https');
 
   var writeFormattedLine = function(line, threadID) {
-    return fs.appendFile(_logdir_ + "/" + threadID + ".log", line + "\n", function() {});
+    return fs.appendFile(_logdir_ + "/" + threadID + ".log", line.replace(/\n/g, '\\n') + "\n", function() {});
   }
 
   var debugWrite = function(line) {
@@ -116,7 +116,7 @@ function main() {
           switch (event.type) {
             case "message":
               if (event.body != "") {
-                writeFormattedLine(event.timestamp + " | " + event.senderID + " | " + event.senderName + " | CHAT | MESSAGE | " + event.body.replace(/\n/g, '\\n'), event.threadID);
+                writeFormattedLine(event.timestamp + " | " + event.senderID + " | " + event.senderName + " | CHAT | MESSAGE | " + event.body, event.threadID);
               }
               if (event.body == "" || event.attachments.length > 0) {
                 iterateAttachments(event);
