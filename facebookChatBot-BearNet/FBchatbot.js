@@ -10,7 +10,7 @@ var _commandprefix = "/"; // Usual prefixes - / ! .
 //////////////////////////////////////////////////
 
 function main() {
-	var handleCommand = function(command, arguments, threadID, api, callback) {
+	var handleCommand = function(command, arguments, event, api, callback) {
 		
 		 // Set up result object for successful command
 		 var result = {
@@ -45,7 +45,7 @@ function main() {
 			settitle: {
 				desc: "Changes the chat title (group chats only)",
 				args: "(title)",
-				exec: function(arguments) {api.setTitle(arguments, threadID)}
+				exec: function(arguments) {api.setTitle(arguments, event.threadID)}
 				},
 			botid: {
 				desc: "Gets the ID of the bot",
@@ -96,7 +96,7 @@ function main() {
 
 				if (strA.length > _commandprefix.length && strA.startsWith(_commandprefix)) command = strA; // Set the command if strA validates as a variable
 				if (command) {
-					handleCommand(command.replace(_commandprefix, ""), strB, event.threadID, api, function(error, result) {
+					handleCommand(command.replace(_commandprefix, ""), strB, event, api, function(error, result) {
 						if (error) {
 							if (error.type == "INFO") {
 								api.sendMessage("Error! " + error.message, event.threadID)
