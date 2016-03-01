@@ -47,7 +47,7 @@ var application = function(err, api) {
     eventWrite('Sending message to ' + _threadid);
 
     api.sendMessage({
-      body: _message.replace(/\\\\n/g, '\n'),
+      body: _message.replace(/\\n/g, '\n'),
     }, _threadid, function(err, res) {
       if (err) {
         eventWrite("Error: " + err.error);
