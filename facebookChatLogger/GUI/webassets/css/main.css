@@ -1,0 +1,223 @@
+html {
+    background-color: #e6e9e9;
+    background-image: -webkit-linear-gradient(270deg,rgb(230,233,233) 0%,rgb(216,221,221) 100%);
+    background-image: linear-gradient(270deg,rgb(230,233,233) 0%,rgb(216,221,221) 100%);
+    -webkit-font-smoothing: antialiased;
+}
+
+img {
+    -webkit-animation: colorize 2s cubic-bezier(0, 0, .78, .36) 1;
+    animation: colorize 2s cubic-bezier(0, 0, .78, .36) 1;
+    background: transparent;
+    border: 10px solid rgba(0, 0, 0, 0.12);
+    border-radius: 4px;
+    display: block;
+    margin: 1.3em auto;
+    max-width: 95%;
+}
+
+@-webkit-keyframes colorize {
+    0% {
+        -webkit-filter: grayscale(100%);
+    }
+    100% {
+        -webkit-filter: grayscale(0%);
+    }
+}
+
+@keyframes colorize {
+    0% {
+        filter: grayscale(100%);
+    }
+    100% {
+        filter: grayscale(0%);
+    }
+}
+@import url(https://fonts.googleapis.com/css?family=Roboto);
+html {
+    height: 100%;
+}
+
+html, body {
+    font-family: 'Roboto', sans-serif;
+}
+
+body {
+    background: transparent url("https://images.unsplash.com/photo-1444044205806-38f3ed106c10?ixlib=rb-0.3.5&q=80&fm=jpg&crop=entropy&s=9c53d289059cccef8ab155f3269af87a") repeat scroll 0% 0% / cover;
+    position:absolute;
+    top:0;
+    bottom:0;
+    right:0;
+    left:0;
+    margin: 0;
+    overflow: hidden;
+}
+
+.convoList_entry:hover {
+    background-color: #F4F5F5;
+}
+
+#convoThread, #convoList {
+    background-color: white;
+    height: 89vh;
+}
+
+
+#container {
+    /* for the animation */
+    visibility: hidden;
+
+    border-radius: 3px;
+    box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.06), 0px 2px 5px 0px rgba(0, 0, 0, 0.2);
+    height: 100vh;
+    height: 98vh;
+    max-width: 1200px;
+    margin: auto;
+}
+
+body::after {
+    position: absolute;
+    z-index: -1;
+    background-color: #4F7999;
+    width: 100%;
+    height: 127px;
+    content: "";
+    animation: 0.2s cubic-bezier(0.1, 0.82, 0.25, 1) 0s normal none 1 running bar-slide;
+    top: 0px;
+    left: 0px;
+}
+
+#header {
+    margin: 0;
+    background-color: #0686FF;
+    color: white;
+    height: 10vh;
+}
+
+#header > div {
+	margin-top: 3.5vh;
+    float: left;
+    text-align: center;
+    font-size: 20px;
+}
+#header > #applicationName {
+    width: 33.3333%;
+}
+#active_chat_username {
+    width: 66.6666%;
+}
+
+#convoList {
+    background-color: white;
+    position:absolute;
+    overflow-y:scroll;
+    overflow-x:hidden;
+    max-width: 400px;
+    width: 33.3333%;    
+}
+
+#convoList_searchBar {
+	width: 96%;
+	margin: 3px;
+	padding: 2px;
+	font-size: 1em;
+}
+
+#convoList_searchBar::-webkit-input-placeholder {
+	color: #686868;
+}
+
+#convoList_searchBar:-moz-placeholder {
+    color: #686868;
+}
+
+#convoList_searchBar::-moz-placeholder {
+    color: #686868;
+}
+
+#convoList_searchBar:-ms-input-placeholder {
+    color: #686868;
+}
+
+.convoList_entry {
+	border-bottom: 1px solid #F2F2F2;
+	padding: 5px;
+}
+
+.convoList_entry_thread {
+	float: left;
+	_width: 75%; /* TODO: GET WANTED SIZE; */
+
+	text-overflow: ellipsis;
+	white-space: nowrap; 
+	overflow: hidden;
+	font-size: 1em;	
+}
+
+.convoList_entry_timestamp {
+	text-align: right;
+	font-size: 1em;
+	color: darkgrey;
+}
+
+.convoList_entry_lastevent {
+	color: #666682;
+	text-overflow: ellipsis;
+	white-space: nowrap; 
+	overflow: hidden;
+	font-size: 20px;
+}
+
+#convoThread {
+    float: right;
+    width: 66.6666%;
+    max-width: 800px;
+    overflow-y:scroll;
+    word-break: break-word;	
+    background: #EAE4DE url("/webassets/school.png") repeat scroll 0% 0%;
+}
+.message_chat {
+    border-radius: 5px;
+}
+
+.message_me {
+	padding: 4px;
+    background-color: #0686FF;
+    color: white;
+    line-height:1.5em;
+}
+.message_them {
+	padding: 4px;
+    background-color: #C6C6C6;
+    line-height:1.5em;
+}
+.message_error {
+    display: none;
+}
+.messageWrap_me {
+	padding: 4px;
+    text-align: right;
+	line-height:1.5em;
+}
+.messageWrap_them {
+	padding: 4px;
+    text-align: left;
+	line-height:1.5em;
+}
+
+.preload * {
+  -webkit-animation: none !important;
+  -moz-animation: none !important;
+  -ms-animation: none !important;
+  -o-animation: none !important;
+  animation: none !important;
+}
+
+
+#convoThread, #convoList {
+    background-color: white;
+}
+#header {
+    margin-top: 1vh;
+    height: 9vh;
+}
