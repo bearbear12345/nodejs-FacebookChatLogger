@@ -1,8 +1,8 @@
-/* User Credentials */
+/* user credentials */
 var _username_ = "";
 var _password_ = "";
 
-/* Application Settings */
+/* application settings */
 var _logdir_ = __dirname + "/logs";
 var _downloadsdir_ = __dirname + "/downloads";
 
@@ -24,7 +24,7 @@ function main() {
   }
 
   var debugWrite = function(line) {
-    console.log(line_ = Math.round(new Date().getTime() / 1000.0) + " - " + line)
+    console.log('\x1b[36m' + (line_ = Math.round(new Date().getTime() / 1000.0)) + '\x1b[0m' + " - " + line)
     fs.appendFile("debug.log", line_ + "\n", function() {});
   }
 
@@ -58,20 +58,20 @@ function main() {
       switch (fileinfo.type) {
         case "file":
           var localloc = event.timestamp + "_" + fileinfo.ID + " (" + fileinfo.name + ")." + fileinfo.name.split(".").pop();
-          writeFormattedLine(event.timestamp + " | " + event.senderID + " | " + event.senderName + " | CHAT | FILE | '" + localloc + "'", event.threadID);
+          writeFormattedLine(event.timestamp + " | " + event.senderID + " | " + event.senderName_ + " | CHAT | FILE | '" + localloc + "'", event.threadID);
           download(fileinfo.url, _downloadsdir_ + "/thread/" + event.threadID, localloc);
           break;
         case "photo":
-          var localloc = event.timestamp + "_" + fileinfo.ID + "." + fileinfo.filename.split(".").pop();
-          writeFormattedLine(event.timestamp + " | " + event.senderID + " | " + event.senderName + " | CHAT | IMAGE | '" + localloc + "'", event.threadID);
+          var localloc = event.timestamp + "_" + fileinfo.ID + "." + (fileinfo.filename.split(".").pop()||"unknown");
+          writeFormattedLine(event.timestamp + " | " + event.senderID + " | " + event.senderName_ + " | CHAT | IMAGE | '" + localloc + "'", event.threadID);
           download(fileinfo.hiresUrl, _downloadsdir_ + "/thread/" + event.threadID, localloc);
           break;
         case "sticker":
-          writeFormattedLine(event.timestamp + " | " + event.senderID + " | " + event.senderName + " | CHAT | STICKER | Sticker " + fileinfo.packID + "/" + fileinfo.stickerID, event.threadID);
+          writeFormattedLine(event.timestamp + " | " + event.senderID + " | " + event.senderName_ + " | CHAT | STICKER | Sticker " + fileinfo.packID + "/" + fileinfo.stickerID, event.threadID);
           download(fileinfo.url, _downloadsdir_ + "/sticker/" + fileinfo.packID, fileinfo.stickerID + ".png")
           break;
         case "animated_image":
-          writeFormattedLine(event.timestamp + " | " + event.senderID + " | " + event.senderName + " | CHAT | IMAGE | Animated Gif - ... meh", event.threadID);
+          writeFormattedLine(event.timestamp + " | " + event.senderID + " | " + event.senderName_ + " | CHAT | IMAGE | Animated Gif - ... meh", event.threadID);
           break;
         default:
           debugWrite('found new attachment type - ' + fileinfo.type);
@@ -115,12 +115,15 @@ function main() {
         if (typeof event !== "undefined") {
           switch (event.type) {
             case "message":
-              if (event.body != "") {
-                writeFormattedLine(event.timestamp + " | " + event.senderID + " | " + event.senderName + " | CHAT | MESSAGE | " + event.body, event.threadID);
-              }
-              if (event.body == "" || event.attachments.length > 0) {
-                iterateAttachments(event);
-                break;
+              if (event.senderName !== undefined) {
+                  if (event.body != "") {
+                    event.senderName_ = event.participantNames[event.participantIDs.indexOf(parseInt(event.senderID))]
+                    writeFormattedLine(event.timestamp + " | " + event.senderID + " | " + event.senderName_ + " | CHAT | MESSAGE | " + event.body, event.threadID);
+                  }
+                  if (event.body == "" || event.attachments.length > 0) {
+                    iterateAttachments(event);
+                    break;
+                  }
               }
               break;
             case "event":
