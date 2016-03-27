@@ -117,10 +117,9 @@ function main() {
             case "message":
               if (event.senderName !== undefined) {
                   if (event.body != "") {
-                    event.senderName_ = event.participantNames[event.participantIDs.indexOf(parseInt(event.senderID))]
                     writeFormattedLine(event.timestamp + " | " + event.senderID + " | " + event.senderName_ + " | CHAT | MESSAGE | " + event.body, event.threadID);
                   }
-                  if (event.body == "" || event.attachments.length > 0) {
+                  if (event.attachments.length > 0) {
                     iterateAttachments(event);
                     break;
                   }
