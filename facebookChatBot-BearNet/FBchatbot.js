@@ -12,9 +12,9 @@ var _botadmins = []; // Numerical facebook ids of bot administrators (more comma
 //////////////////////////////////////////////////
 
 
-Array.prototype.hasItem = function(item) {return this.indexOf(item) > -1 ? true : false} // Array extension to check for an item
+Array.prototype.hasItem = function(item) {return this.indexOf(item) > -1}; // Array extension to check for an item
 	
-_botadmins.forEach(function(id, i){_botadmins[i] = id.toString()}) // Convert (int) ids into (str) ids // Ensures that both ids as either strings or numbers work.
+_botadmins.forEach(function(id, i){_botadmins[i] = id.toString()}); // Convert (int) ids into (str) ids // Ensures that both ids as either strings or numbers work.
 
 function main() {
 	var titleLock = { // Title locking utilities
@@ -29,13 +29,12 @@ function main() {
 		// registers title lock
 		register: function(id, title){this.data[id] = title; this.writeFS();},
 		// unregisters title lock
-		unregister: function(id){delete this.data[id]; this.writeFS();},
-	}
+		unregister: function(id){delete this.data[id]; this.writeFS();}
+    };
 
 	var botID;
 	var isAdmin = function(id) {return _ownerid == id || _botadmins.hasItem(id)}; // Boolean - Check if admin
 	var handleCommand = function(command, arguments, event, api, callback) {
-		var isGroup = event.participantIDs.length > 2;
 
 		// Set up result object for successful command
 		var result = {
@@ -45,7 +44,7 @@ function main() {
 		
 		// Check if arguments are present (if needed) then run command
 		var assertCommandArguments = function(command, arguments) {
-			if (!isGroup && commands[command].hasOwnProperty('groupOnly') && commands[command]['groupOnly']) {
+			if (!event.isGroup && commands[command].hasOwnProperty('groupOnly') && commands[command]['groupOnly']) {
 				callback({
 					type: "INFO",
 					message: "This command only works in a group chat"
@@ -64,16 +63,16 @@ function main() {
 			} else {
 				commands[command].exec(arguments); // Run command
 			}
-		}
+		};
 
 		var commands = { // Declare commands here
 /*			Command format: 
 				{
 				desc: "...",
-				groupOnly: true/false OPTIONAL
-				args: "(ARG1) (ARG2) ..." OPTIONAL
-				exec: function(){...}
-				}
+				groupOnly: true/false OPTIONAL,
+				args: "(ARG1) (ARG2) ..." OPTIONAL,
+				exec: function(){...},
+				},
 */
 			settitle: {
 				desc: "Changes the thread title",
@@ -94,7 +93,7 @@ function main() {
 								})
 							} else {
 								if (!titleLock.tryGet(event.threadID)) { // If thread title is not locked
-									titleLock.register(event.threadID, event.threadName) // then lock the thread title.
+									titleLock.register(event.threadID, event.threadName); // then lock the thread title.
 									result.message = "Thread title locked!";
 								} else {
 									callback({  // Error thrown if thread title is already locked
@@ -131,6 +130,77 @@ function main() {
 								message: "You do not have permission to unlock the thread title."
 							})
 						}
+					}
+				},
+			setcolour: {
+				desc: "Changes the thread colour",
+				exec: function(hexcode) {
+						if (!hexcode) {
+							hexcode = (Math.random() * 0xFFFFFF << 0).toString(16)
+						} else {
+							if (hexcode.length == 2 && hexcode.startsWith("_")) {
+								switch (hexcode[1]) {
+									case "A":
+										hexcode = "0084FF";
+										break;
+									case "B":
+										hexcode = "44BEC7";
+										break;
+									case "C":
+										hexcode = "FFC300";
+										break;
+									case "D":
+										hexcode = "FA3C4C";
+										break;
+									case "E":
+										hexcode = "D696BB";
+										break;
+									case "F":
+										hexcode = "6699CC";
+										break;
+									case "G":
+										hexcode = "13CF13";
+										break;
+									case "H":
+										hexcode = "FF7E29";
+										break;
+									case "I":
+										hexcode = "E68585";
+										break;
+									case "J":
+										hexcode = "7646FF";
+										break;
+									case "K":
+										hexcode = "20CEF5";
+										break;
+									case "L":
+										hexcode = "67B868";
+										break;
+									case "M":
+										hexcode = "D4A88C";
+										break;
+									case "N":
+										hexcode = "FF5CA1";
+										break;
+									case "O":
+										hexcode = "A695C7";
+										break;
+								}
+							}
+							hexcode = hexcode.replace("#", "");
+							if (/(^[0-9A-F]{6}$)|(^[0-9A-F]{3}$)/i.test(hexcode)) {
+								if (hexcode.length == 3) hexcode = hexcode[0] + hexcode[0] + hexcode[1] + hexcode[1] + hexcode[2] + hexcode[2]
+							} else {
+								callback({ // Invalid Hex Code
+									type: "INFO",
+									message: "Invalid HEX code supplied! Use a 3/6 digit hex colour, or _A, _B, _C, ... _M, _N, _O"
+								})
+							}
+						}
+
+						api.changeThreadColor("#" + hexcode, event.threadID, function callback(err) {
+							if (err) return console.error(err);
+						});
 					}
 				},
 			botid: {
@@ -177,7 +247,7 @@ function main() {
 				return;
 			}
 			if (botID != event.senderID || botID != event.author) {
-				if (event.type == "message") {
+				if (event.type == "message" && event.body) {
 					var strA;
 					var strB;
 					var command;
@@ -192,7 +262,7 @@ function main() {
 
 					if (strA.length > _commandprefix.length && strA.startsWith(_commandprefix)) command = strA; // Set the command if strA validates as a variable
 					if (command) {
-						var commandParse = command.replace(_commandprefix, "")
+						var commandParse = command.replace(_commandprefix, "");
 						handleCommand(commandParse, strB, event, api, function(error, result) {
 							if (error) {
 								if (error.type == "INFO") {
@@ -208,7 +278,7 @@ function main() {
 								return;
 							}
 							if (result.message) {
-								api.sendMessage(result.message, result.threadID ? result.threadID : event.threadID) // Send message to either the original thread or a specified thread, depending on the command result
+								api.sendMessage(result.message, result.threadID ? result.threadID : event.threadID); // Send message to either the original thread or a specified thread, depending on the command result
 							}
 						});
 					}
@@ -225,15 +295,15 @@ function main() {
 				}
 			}
 		});
-	}
+	};
 
 	var login = require("facebook-chat-api");
 	var fs = require('fs');
 
 	var debugWrite = function(line) {
-		console.log(line_ = Math.round(new Date().getTime() / 1000.0) + " - " + line)
+		console.log(line_ = Math.round(new Date().getTime() / 1000.0) + " - " + line);
 		fs.appendFile("chatbot_debug.log", line_ + "\n", function() {});
-	}
+	};
 
 /* Session / U&P combination login */
 	var loginFunc = function(err, api) {
@@ -254,18 +324,18 @@ function main() {
 			fs.writeFileSync(__dirname + '/.chatbot_appstate.json', JSON.stringify(api.getAppState()));
 			api.setOptions({
 				logLevel: "error",
-				listenEvents: true,
-			});
+				listenEvents: true
+            });
 			botID = api.getCurrentUserID();
 			titleLock.readFS(); // Get previously title-locked threads
 			application(api);
 		}
-	}
+	};
 	login({
 		appState: fs.existsSync(__dirname + '/.chatbot_appstate.json') ? JSON.parse(fs.readFileSync(__dirname + '/.chatbot_appstate.json', 'utf8')) : "",
 		email: _username_,
-		password: _password_,
-	}, loginFunc);
+		password: _password_
+    }, loginFunc);
 }
 
 // Let's go! @.@
